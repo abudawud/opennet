@@ -73,7 +73,7 @@ main (int argc, char **argv)
   ip_flags = allocate_intmem (4);
 
   // Interface to send packet through.
-  strcpy (interface, "wlan0");
+  strcpy (interface, "eth0");
 
   // Submit request for a socket descriptor to look up interface.
   if ((sd = socket (AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0) {
@@ -94,10 +94,10 @@ main (int argc, char **argv)
   printf ("Index for interface %s is %i\n", interface, ifr.ifr_ifindex);
 
   // Source IPv4 address: you need to fill this out
-  strcpy (src_ip, "10.10.3.1");
+  strcpy (src_ip, "192.168.0.100");
 
   // Destination URL or IPv4 address: you need to fill this out
-  strcpy (target, "10.10.3.9");
+  strcpy (target, "192.168.0.1");
 
   // Fill out hints for getaddrinfo().
   memset (&hints, 0, sizeof (struct addrinfo));
@@ -129,7 +129,7 @@ main (int argc, char **argv)
   // IPv4 header
 
   // IPv4 header length (4 bits): Number of 32-bit words in header = 5
-  iphdr.ip_hl = IP4_HDRLEN / sizeof (uint32_t);
+  iphdr.ip_hl = 5;
 
   // Internet Protocol version (4 bits): IPv4
   iphdr.ip_v = 4;
@@ -167,20 +167,22 @@ main (int argc, char **argv)
 
   // Transport layer protocol (8 bits): 1 for ICMP
   iphdr.ip_p = IPPROTO_ICMP;
-
+   iphdr.ip_src.s_addr = inet_addr(src_ip);
+   iphdr.ip_dst.s_addr = inet_addr(dst_ip);
   // Source IPv4 address (32 bits)
-  if ((status = inet_pton (AF_INET, src_ip, &(iphdr.ip_src))) != 1) {
-    fprintf (stderr, "inet_pton() failed.\nError message: %s", strerror (status));
-    exit (EXIT_FAILURE);
-  }
+//  if ((status = inet_pton (AF_INET, src_ip, &(iphdr.ip_src))) != 1) {
+//    fprintf (stderr, "inet_pton() failed.\nError message: %s", strerror (status));
+//    exit (EXIT_FAILURE);
+//  }
 
   // Destination IPv4 address (32 bits)
-  if ((status = inet_pton (AF_INET, dst_ip, &(iphdr.ip_dst))) != 1) {
-    fprintf (stderr, "inet_pton() failed.\nError message: %s", strerror (status));
-    exit (EXIT_FAILURE);
-  }
+//  if ((status = inet_pton (AF_INET, dst_ip, &(iphdr.ip_dst))) != 1) {
+//    fprintf (stderr, "inet_pton() failed.\nError message: %s", strerror (status));
+//    exit (EXIT_FAILURE);
+//  }
 
   // IPv4 header checksum (16 bits): set to 0 when calculating checksum
+  //
   iphdr.ip_sum = 0;
   iphdr.ip_sum = checksum ((uint16_t *) &iphdr, IP4_HDRLEN);
 
@@ -213,7 +215,8 @@ main (int argc, char **argv)
   memcpy (packet + IP4_HDRLEN + ICMP_HDRLEN, data, datalen);
 
   // Calculate ICMP header checksum
-  icmphdr.icmp_cksum = checksum ((uint16_t *) (packet + IP4_HDRLEN), ICMP_HDRLEN + datalen);
+  //icmphdr.icmp_cksum = checksum ((uint16_t *) (packet + IP4_HDRLEN), ICMP_HDRLEN + datalen);
+  icmphdr.icmp_cksum = 0x3e2c;
   memcpy ((packet + IP4_HDRLEN), &icmphdr, ICMP_HDRLEN);
 
   // The kernel is going to prepare layer 2 information (ethernet frame header) for us.
@@ -225,30 +228,30 @@ main (int argc, char **argv)
   sin.sin_addr.s_addr = iphdr.ip_dst.s_addr;
 
   // Submit request for a raw socket descriptor.
-  if ((sd = socket (AF_INET, SOCK_RAW, ipr)) < 0) {
+  if ((sd = socket (AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0) {
     perror ("socket() failed ");
     exit (EXIT_FAILURE);
   }
 
   // Set flag so socket expects us to provide IPv4 header.
-  if (setsockopt (sd, IPPROTO_IP, IP_HDRINCL, &on, sizeof (on)) < 0) {
-    perror ("setsockopt() failed to set IP_HDRINCL ");
-    exit (EXIT_FAILURE);
-  }
+//  if (setsockopt (sd, IPPROTO_IP, IP_HDRINCL, &on, sizeof (on)) < 0) {
+//    perror ("setsockopt() failed to set IP_HDRINCL ");
+//    exit (EXIT_FAILURE);
+//  }
 
   // Bind socket to interface index.
-  if (setsockopt (sd, SOL_SOCKET, SO_BINDTODEVICE, &ifr, sizeof (ifr)) < 0) {
-    perror ("setsockopt() failed to bind to interface ");
-    exit (EXIT_FAILURE);
-  }
+//  if (setsockopt (sd, SOL_SOCKET, SO_BINDTODEVICE, &ifr, sizeof (ifr)) < 0) {
+//    perror ("setsockopt() failed to bind to interface ");
+//    exit (EXIT_FAILURE);
+//  }
 
   // Send packet.
-  for(;;){
+//  for(;;){
   if (sendto (sd, packet, IP4_HDRLEN + ICMP_HDRLEN + datalen, 0, (struct sockaddr *) &sin, sizeof (struct sockaddr)) < 0)  {
     perror ("sendto() failed ");
     exit (EXIT_FAILURE);
   }
-  }
+//  }
   // Close socket descriptor.
   puts("wait");
   getchar();
