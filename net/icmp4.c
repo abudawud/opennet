@@ -97,7 +97,7 @@ main (int argc, char **argv)
   strcpy (src_ip, "192.168.0.100");
 
   // Destination URL or IPv4 address: you need to fill this out
-  strcpy (target, "192.168.0.1");
+  strcpy (target, "192.168.0.102");
 
   // Fill out hints for getaddrinfo().
   memset (&hints, 0, sizeof (struct addrinfo));
@@ -184,7 +184,7 @@ main (int argc, char **argv)
   // IPv4 header checksum (16 bits): set to 0 when calculating checksum
   //
   iphdr.ip_sum = 0;
-  iphdr.ip_sum = checksum ((uint16_t *) &iphdr, IP4_HDRLEN);
+  //iphdr.ip_sum = checksum ((uint16_t *) &iphdr, IP4_HDRLEN);
 
   // ICMP header
 
@@ -216,7 +216,7 @@ main (int argc, char **argv)
 
   // Calculate ICMP header checksum
   //icmphdr.icmp_cksum = checksum ((uint16_t *) (packet + IP4_HDRLEN), ICMP_HDRLEN + datalen);
-  icmphdr.icmp_cksum = 0x3e2c;
+  icmphdr.icmp_cksum = 0;
   memcpy ((packet + IP4_HDRLEN), &icmphdr, ICMP_HDRLEN);
 
   // The kernel is going to prepare layer 2 information (ethernet frame header) for us.
