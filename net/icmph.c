@@ -69,8 +69,8 @@ int main(){
    ip->ttl = 255;
    ip->proto = 1;
    ip->chksum = 0;
-   ip->srcAddr = inet_addr("180.250.206.225");
-   ip->dstAddr = inet_addr("180.250.206.226");
+   ip->srcAddr = inet_addr("192.168.43.10");
+   ip->dstAddr = inet_addr("192.168.43.1");
   
    ip->chksum = checksum((uint16_t *)ip, sizeof(struct iphdr)); 
 //   printf("tos %x, %x\n", &ip->tos, &packet[1]);
