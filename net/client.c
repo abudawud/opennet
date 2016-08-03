@@ -4,6 +4,7 @@
 
 int main(int argc, char *argv[]){
    int sfd;
+   char buf[20];
    struct sockaddr_in dest;
 
    dest.sin_family = AF_INET;
@@ -20,9 +21,16 @@ int main(int argc, char *argv[]){
    puts("connection ready");
    getchar();
 
+   for (;;){
    write(sfd, "HAI", 4);
+   }
+
+   recv(sfd, buf, 20, 0);
+
+   printf("rec: %s\n", buf);
 
    puts("exiting");
+   close(sfd);
    getchar();
 
    return 0;

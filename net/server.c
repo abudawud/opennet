@@ -22,6 +22,8 @@ int main(int argc, char *argv[]){
    local.sin_addr.s_addr = inet_addr(argv[1]);
 
    sfd = socket(AF_INET, SOCK_STREAM, 0);
+   if (sfd == -1)
+      printf("socket %m");
 
    bind(sfd, (struct sockaddr *)&local, sizeof(struct sockaddr));
 
@@ -35,7 +37,9 @@ int main(int argc, char *argv[]){
    recvfrom(peerfd, buf, 10, 0, (struct sockaddr *)&src, &len);
    printf("recvfrom %m\n");
 
+   for(;;){
    sendto(peerfd, "SYSTEM INSECURE", 15, 0, (struct sockaddr *)&peer, sizeof(struct sockaddr));
+   }
 
    printf("incoming from %s: %s\n", inet_ntoa(peer.sin_addr), buf);
    puts("complete");
